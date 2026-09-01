@@ -36,6 +36,32 @@ function buildFillValues(data: NdaFormData): Record<string, FillValue> {
   };
 }
 
+/**
+ * Type hierarchy in the document, loudest to quietest. Each tier changes
+ * family, size, weight AND colour, so a heading is never mistakable for the
+ * label or the prose beneath it:
+ *   SectionTitle  serif   1.15rem  semibold  ink        — outranks the body
+ *   PartyLabel    mono    0.7rem   uppercase seal-dark  — names a column
+ *   Caption       mono    0.6rem   uppercase slate      — names a field
+ *   value         mono             .doc-fill seal-dark  — typed data
+ *   body          serif   0.95rem            ink        — the agreement
+ */
+function SectionTitle({ children }: { children: ReactNode }) {
+  return (
+    <h2 className="font-serif text-[1.15rem] font-semibold tracking-tight text-ink mb-5">
+      {children}
+    </h2>
+  );
+}
+
+function PartyLabel({ children }: { children: ReactNode }) {
+  return (
+    <p className="font-mono text-[0.7rem] tracking-[0.18em] uppercase text-seal-dark">
+      {children}
+    </p>
+  );
+}
+
 /** Small caps caption. Every field carries one, so no value is ever unlabeled. */
 function Caption({ children }: { children: ReactNode }) {
   return (
@@ -67,7 +93,7 @@ function FieldValue({
 function SignatureLine({ label }: { label: string }) {
   return (
     <div>
-      <div className="h-7 border-b border-rule" />
+      <div className="h-9 border-b border-rule" />
       <p className="mt-1 font-mono text-[0.6rem] tracking-[0.14em] uppercase text-slate">
         {label}
       </p>
@@ -77,11 +103,9 @@ function SignatureLine({ label }: { label: string }) {
 
 function PartyBlock({ label, party }: { label: string; party: PartyInfo }) {
   return (
-    <div className="space-y-3">
-      <p className="font-mono text-[0.7rem] tracking-[0.18em] uppercase text-seal-dark">
-        {label}
-      </p>
-      <dl className="space-y-2 text-[0.95rem]">
+    <div className="space-y-5">
+      <PartyLabel>{label}</PartyLabel>
+      <dl className="space-y-4 text-[0.95rem]">
         <div>
           <Caption>Legal name</Caption>
           <FieldValue value={party.name} className="font-semibold" />
@@ -92,8 +116,9 @@ function PartyBlock({ label, party }: { label: string; party: PartyInfo }) {
         </div>
       </dl>
 
-      <div className="rounded-md bg-[rgba(216,212,200,0.32)] px-4 py-3.5 space-y-3">
-        <dl className="space-y-2 text-[0.9rem]">
+      {/* Paper-white card on the tinted ground — one tint reads cleaner than two. */}
+      <div className="rounded-md bg-paper px-5 py-5 space-y-5">
+        <dl className="space-y-4 text-[0.9rem]">
           <div>
             <Caption>Name</Caption>
             <FieldValue value={party.signatoryName} />
@@ -132,16 +157,17 @@ const NdaDocument = forwardRef<HTMLDivElement, { data: NdaFormData }>(
           </p>
         </header>
 
-        <section className="grid sm:grid-cols-2 gap-8 rounded-lg bg-[rgba(216,212,200,0.18)] px-6 py-7 mb-9">
-          <PartyBlock label="Party 1" party={data.partyA} />
-          <PartyBlock label="Party 2" party={data.partyB} />
+        <section className="mb-14">
+          <SectionTitle>Parties</SectionTitle>
+          <div className="grid sm:grid-cols-2 gap-10 rounded-lg bg-[rgba(216,212,200,0.3)] px-7 py-8 sm:px-9 sm:py-9">
+            <PartyBlock label="Party 1" party={data.partyA} />
+            <PartyBlock label="Party 2" party={data.partyB} />
+          </div>
         </section>
 
-        <section className="mb-10">
-          <p className="font-mono text-[0.7rem] tracking-[0.18em] uppercase text-seal-dark mb-3">
-            Key Terms
-          </p>
-          <dl className="grid sm:grid-cols-2 gap-x-8 gap-y-3.5 text-[0.95rem]">
+        <section className="mb-14">
+          <SectionTitle>Key Terms</SectionTitle>
+          <dl className="grid sm:grid-cols-2 gap-x-10 gap-y-6 text-[0.95rem]">
             <div className="sm:col-span-2">
               <Caption>Purpose</Caption>
               <FieldValue value={data.purpose} />
@@ -181,9 +207,7 @@ const NdaDocument = forwardRef<HTMLDivElement, { data: NdaFormData }>(
         </section>
 
         <section>
-          <p className="font-mono text-[0.7rem] tracking-[0.18em] uppercase text-seal-dark mb-4">
-            Standard Terms
-          </p>
+          <SectionTitle>Standard Terms</SectionTitle>
           <ol className="space-y-5 text-[0.95rem] leading-relaxed">
             {STANDARD_TERMS.map((term) => (
               <li key={term.number} className="flex gap-3">
