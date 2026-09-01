@@ -26,7 +26,9 @@ export default function DownloadButton({
       const html2pdf = (await import("html2pdf.js")).default;
       await html2pdf()
         .set({
-          margin: 0,
+          // Inches. Applies to every page, so clause text on pages 2+ doesn't
+          // run flush to the paper edge (the sheet's own padding only pads p1).
+          margin: 0.5,
           filename,
           image: { type: "jpeg", quality: 0.98 },
           html2canvas: { scale: 2, useCORS: true, backgroundColor: "#fdfdfb" },
@@ -38,7 +40,8 @@ export default function DownloadButton({
         } as any)
         .from(node)
         .save();
-    } catch {
+    } catch (cause) {
+      console.error("PDF generation failed", cause);
       setError("Couldn't generate the PDF. Please try again.");
     } finally {
       setIsGenerating(false);

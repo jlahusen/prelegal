@@ -165,13 +165,13 @@ export default function NdaForm({ data, onChange }: NdaFormProps) {
         <Field
           label="Purpose"
           htmlFor="purpose"
-          hint="Completes: “in connection with the Purpose (…)”"
+          hint="Completes the clause “…in connection with the ___”, so phrase it as a noun."
         >
           <textarea
             id="purpose"
             rows={2}
             className={inputClasses}
-            placeholder="evaluating a potential business partnership between the parties"
+            placeholder="evaluation of a potential business partnership between the parties"
             value={data.purpose}
             onChange={(e) => onChange({ ...data, purpose: e.target.value })}
           />

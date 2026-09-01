@@ -24,6 +24,16 @@ Open [http://localhost:3000](http://localhost:3000).
 - Tailwind CSS v4
 - [`html2pdf.js`](https://github.com/eKoopmans/html2pdf.js) for client-side PDF export — nothing is uploaded anywhere
 
+## Known limitations
+
+- **The exported PDF is a raster, not text.** `html2pdf.js` rasterises the DOM
+  via `html2canvas`, so the PDF's text is not selectable or searchable, and the
+  export reflects the layout at the exporter's current viewport width. Moving to
+  a text-based generator (jsPDF's text API or `@react-pdf/renderer`) would fix
+  both, at the cost of maintaining the document layout twice.
+- **Signature and date are completed by hand.** Neither is collected in the
+  form; the document leaves a ruled line for each, to be signed at execution.
+
 ## Structure
 
 - `src/lib/types.ts` — form data shape and completeness checks

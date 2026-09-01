@@ -102,4 +102,13 @@ body {
     padding: 0 !important;
     margin: 0 !important;
   }
+  /* Without this the preview pane's scroll box clips the contract to one page. */
+  .preview-scroll,
+  .preview-frame {
+    max-height: none !important;
+    overflow: visible !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
 }

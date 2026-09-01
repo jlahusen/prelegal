@@ -91,8 +91,8 @@ export default function Home() {
               <SealStamp sealed={complete} />
             </div>
 
-            <div className="overflow-hidden rounded-lg border border-rule shadow-[0_1px_2px_rgba(28,31,42,0.06),0_12px_32px_-16px_rgba(28,31,42,0.25)]">
-              <div className="max-h-[75vh] overflow-y-auto">
+            <div className="preview-frame overflow-hidden rounded-lg border border-rule shadow-[0_1px_2px_rgba(28,31,42,0.06),0_12px_32px_-16px_rgba(28,31,42,0.25)]">
+              <div className="preview-scroll max-h-[75vh] overflow-y-auto">
                 <NdaDocument ref={documentRef} data={data} />
               </div>
             </div>

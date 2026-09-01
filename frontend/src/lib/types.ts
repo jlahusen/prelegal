@@ -53,18 +53,25 @@ export function isPartyComplete(party: PartyInfo): boolean {
   return REQUIRED_PARTY_FIELDS.every((field) => party[field].trim().length > 0);
 }
 
+/** A duration has to be a real, positive number — "0" and "-3" are not terms. */
+export function isValidDuration(value: string): boolean {
+  const parsed = Number(value.trim());
+  return value.trim().length > 0 && Number.isFinite(parsed) && parsed >= 1;
+}
+
 export function isNdaComplete(data: NdaFormData): boolean {
   const baseFieldsFilled =
     isPartyComplete(data.partyA) &&
     isPartyComplete(data.partyB) &&
     data.purpose.trim().length > 0 &&
     data.effectiveDate.trim().length > 0 &&
-    data.mndaTermValue.trim().length > 0 &&
+    isValidDuration(data.mndaTermValue) &&
     data.governingLaw.trim().length > 0 &&
     data.jurisdiction.trim().length > 0;
 
   const confidentialityFilled =
-    data.confidentialityPerpetual || data.confidentialityTermValue.trim().length > 0;
+    data.confidentialityPerpetual ||
+    isValidDuration(data.confidentialityTermValue);
 
   return baseFieldsFilled && confidentialityFilled;
 }

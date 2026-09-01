@@ -1,9 +1,20 @@
-// Standard Terms transcribed verbatim from ../../../templates/Mutual-NDA.md
-// (Common Paper Mutual Non-Disclosure Agreement, Version 1.0 — CC BY 4.0,
-// https://commonpaper.com/standards/mutual-nda/1.0/). The five `<span
+// Standard Terms transcribed from ../../../templates/Mutual-NDA.md (Common
+// Paper Mutual Non-Disclosure Agreement, Version 1.0 — CC BY 4.0,
+// https://commonpaper.com/standards/mutual-nda/1.0/). The `<span
 // class="coverpage_link">` placeholders in the source have been replaced
 // with `{{token}}` markers so NdaDocument can interpolate the cover page
 // values the user enters into the form.
+//
+// Two meaning-preserving grammar adaptations, because the source displays a
+// defined-term NAME where we substitute its VALUE:
+//   1. Articles before {{effectiveDate}}, {{mndaTerm}} and
+//      {{confidentialityTerm}} moved into the token's own placeholder text,
+//      so a filled clause reads "commences on September 1, 2026" rather than
+//      "commences on the September 1, 2026".
+//   2. In §9 the second {{governingLaw}} and second {{jurisdiction}} are now
+//      the literal words "State" and "courts" — substituting the value there
+//      would read "provisions of such Delaware" / "jurisdiction of such
+//      San Francisco, California".
 export interface StandardTermSection {
   number: number;
   title: string;
@@ -34,7 +45,7 @@ export const STANDARD_TERMS: StandardTermSection[] = [
   {
     number: 5,
     title: "Term and Termination",
-    body: "This MNDA commences on the {{effectiveDate}} and expires at the end of the {{mndaTerm}}. Either party may terminate this MNDA for any or no reason upon written notice to the other party. The Receiving Party’s obligations relating to Confidential Information will survive for the {{confidentialityTerm}}, despite any expiration or termination of this MNDA.",
+    body: "This MNDA commences on {{effectiveDate}} and expires at the end of {{mndaTerm}}. Either party may terminate this MNDA for any or no reason upon written notice to the other party. The Receiving Party’s obligations relating to Confidential Information will survive for {{confidentialityTerm}}, despite any expiration or termination of this MNDA.",
   },
   {
     number: 6,
@@ -54,7 +65,7 @@ export const STANDARD_TERMS: StandardTermSection[] = [
   {
     number: 9,
     title: "Governing Law and Jurisdiction",
-    body: "This MNDA and all matters relating hereto are governed by, and construed in accordance with, the laws of the State of {{governingLaw}}, without regard to the conflict of laws provisions of such {{governingLaw}}. Any legal suit, action, or proceeding relating to this MNDA must be instituted in the federal or state courts located in {{jurisdiction}}. Each party irrevocably submits to the exclusive jurisdiction of such {{jurisdiction}} in any such suit, action, or proceeding.",
+    body: "This MNDA and all matters relating hereto are governed by, and construed in accordance with, the laws of the State of {{governingLaw}}, without regard to the conflict of laws provisions of such State. Any legal suit, action, or proceeding relating to this MNDA must be instituted in the federal or state courts located in {{jurisdiction}}. Each party irrevocably submits to the exclusive jurisdiction of such courts in any such suit, action, or proceeding.",
   },
   {
     number: 10,
