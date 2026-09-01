@@ -40,18 +40,28 @@ body {
   background: rgba(178, 58, 46, 0.25);
 }
 
-/* Filled-in values inside the document read like typed entries on a paper form. */
+/*
+ * Filled-in values inside the document read like typed entries on a paper
+ * form. No border-bottom here on purpose: html2canvas (used for PDF export)
+ * mispositions borders on inline spans that switch font-family mid-line,
+ * rendering as a strikethrough through the text instead of an underline.
+ */
 .doc-fill {
   font-family: var(--font-mono);
   font-size: 0.94em;
   color: var(--seal-dark);
-  border-bottom: 1px solid rgba(178, 58, 46, 0.45);
   padding: 0 0.15em;
 }
 
 .doc-fill[data-empty="true"] {
   color: var(--slate);
   opacity: 0.55;
+}
+
+/* Keep a Standard Terms clause from being sliced across a PDF page boundary. */
+.print-sheet li {
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 @keyframes seal-press {

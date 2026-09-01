@@ -40,9 +40,12 @@ export default function Home() {
               Mutual NDA Creator
             </h1>
           </div>
-          <div className="hidden sm:flex items-center gap-3 text-sm text-slate">
-            <span aria-live="polite">
+          <div className="flex items-center gap-3 text-sm text-slate">
+            <span aria-live="polite" className="hidden sm:inline">
               {complete ? "Ready to seal" : "Fill in the form to continue"}
+            </span>
+            <span aria-live="polite" className="sm:hidden">
+              {complete ? "Ready" : "Draft"}
             </span>
           </div>
         </div>

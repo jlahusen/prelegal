@@ -63,23 +63,23 @@ function PartyBlock({ label, party }: { label: string; party: PartyInfo }) {
         </div>
         <div>
           <dt className="sr-only">Address</dt>
-          <dd className="text-[rgba(28,31,42,0.8)] whitespace-pre-line">
+          <dd className="text-[rgba(28,31,42,0.8)]">
             <Blank value={party.address} lines={4} />
           </dd>
         </div>
       </dl>
-      <div className="pt-3 space-y-1 text-[0.85rem]">
-        <p>
-          Signature: <Blank value="" lines={5} />
-        </p>
+      <div className="mt-3 space-y-1.5 rounded-md bg-[rgba(216,212,200,0.3)] px-3 py-3 text-[0.85rem]">
         <p>
           Name: <Blank value={party.signatoryName} lines={4} />
         </p>
         <p>
           Title: <Blank value={party.signatoryTitle} lines={4} />
         </p>
-        <p>
-          Date: <Blank value="" lines={4} />
+        <p className="text-[rgba(28,31,42,0.55)] italic">
+          Date: to be completed at signing
+        </p>
+        <p className="pt-1 text-[rgba(28,31,42,0.55)] italic">
+          Signature: to be completed at signing
         </p>
       </div>
     </div>
@@ -108,7 +108,7 @@ const NdaDocument = forwardRef<HTMLDivElement, { data: NdaFormData }>(
           </p>
         </header>
 
-        <section className="grid sm:grid-cols-2 gap-8 border-y border-rule py-8 mb-8">
+        <section className="grid sm:grid-cols-2 gap-8 rounded-lg bg-[rgba(216,212,200,0.18)] px-6 py-8 mb-8">
           <PartyBlock label="Party 1" party={data.partyA} />
           <PartyBlock label="Party 2" party={data.partyB} />
         </section>

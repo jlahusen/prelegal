@@ -7,11 +7,9 @@ interface SealStampProps {
 
 export default function SealStamp({ sealed, className = "" }: SealStampProps) {
   return (
-    <div
-      className={`relative flex flex-col items-center gap-2 ${className}`}
-      aria-hidden="true"
-    >
+    <div className={`relative flex flex-col items-center gap-2 ${className}`}>
       <svg
+        aria-hidden="true"
         viewBox="0 0 96 96"
         width="72"
         height="72"
@@ -67,6 +65,7 @@ export default function SealStamp({ sealed, className = "" }: SealStampProps) {
       <span
         className="font-mono text-[0.65rem] tracking-[0.2em] uppercase"
         style={{ color: sealed ? "var(--seal-dark)" : "var(--slate)" }}
+        aria-live="polite"
       >
         {sealed ? "Sealed" : "Draft"}
       </span>
