@@ -63,7 +63,7 @@ function PartyBlock({ label, party }: { label: string; party: PartyInfo }) {
         </div>
         <div>
           <dt className="sr-only">Address</dt>
-          <dd className="text-ink/80 whitespace-pre-line">
+          <dd className="text-[rgba(28,31,42,0.8)] whitespace-pre-line">
             <Blank value={party.address} lines={4} />
           </dd>
         </div>

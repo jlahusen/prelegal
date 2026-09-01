@@ -36,7 +36,8 @@ body {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--seal) 25%, transparent);
+  /* rgba, not color-mix(): html2canvas (used for PDF export) can't parse color-mix(). */
+  background: rgba(178, 58, 46, 0.25);
 }
 
 /* Filled-in values inside the document read like typed entries on a paper form. */
@@ -44,7 +45,7 @@ body {
   font-family: var(--font-mono);
   font-size: 0.94em;
   color: var(--seal-dark);
-  border-bottom: 1px solid color-mix(in srgb, var(--seal) 45%, transparent);
+  border-bottom: 1px solid rgba(178, 58, 46, 0.45);
   padding: 0 0.15em;
 }
 

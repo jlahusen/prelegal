@@ -30,7 +30,7 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="no-print border-b border-rule bg-bond/95 backdrop-blur">
+      <header className="no-print border-b border-rule bg-[rgba(242,243,238,0.95)] backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div>
             <p className="font-mono text-[0.7rem] tracking-[0.2em] uppercase text-slate">

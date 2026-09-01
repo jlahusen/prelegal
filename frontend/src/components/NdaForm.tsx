@@ -9,7 +9,7 @@ interface NdaFormProps {
 }
 
 const inputClasses =
-  "w-full rounded-md border border-rule bg-paper px-3 py-2 text-[0.925rem] text-ink placeholder:text-slate/60 focus:outline-none focus:ring-2 focus:ring-seal/40 focus:border-seal transition-colors";
+  "w-full rounded-md border border-rule bg-paper px-3 py-2 text-[0.925rem] text-ink placeholder:text-[rgba(91,100,114,0.6)] focus:outline-none focus:ring-2 focus:ring-[rgba(178,58,46,0.4)] focus:border-seal transition-colors";
 
 function Field({
   label,
@@ -26,7 +26,7 @@ function Field({
     <div className="space-y-1.5">
       <label
         htmlFor={htmlFor}
-        className="block text-[0.8rem] font-medium text-ink/85"
+        className="block text-[0.8rem] font-medium text-[rgba(28,31,42,0.85)]"
       >
         {label}
       </label>
@@ -217,7 +217,7 @@ export default function NdaForm({ data, onChange }: NdaFormProps) {
               }
             />
           </Field>
-          <label className="flex items-center gap-2 text-[0.8rem] text-ink/85">
+          <label className="flex items-center gap-2 text-[0.8rem] text-[rgba(28,31,42,0.85)]">
             <input
               type="checkbox"
               className="rounded border-rule accent-seal"

@@ -42,7 +42,7 @@ export default function DownloadButton({
       type="button"
       onClick={handleDownload}
       disabled={disabled || isGenerating}
-      className="w-full rounded-md bg-seal px-4 py-2.5 text-sm font-medium text-paper transition-colors hover:bg-seal-dark disabled:cursor-not-allowed disabled:bg-slate/40"
+      className="w-full rounded-md bg-seal px-4 py-2.5 text-sm font-medium text-paper transition-colors hover:bg-seal-dark disabled:cursor-not-allowed disabled:bg-[rgba(91,100,114,0.4)]"
     >
       {isGenerating
         ? "Preparing PDF…"
