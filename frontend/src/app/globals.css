@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #1c1f2a;
+  --bond: #f2f3ee;
+  --paper: #fdfdfb;
+  --seal: #b23a2e;
+  --seal-dark: #8c2c22;
+  --ledger: #2f4538;
+  --slate: #5b6472;
+  --rule: #d8d4c8;
+
+  --font-serif: var(--font-source-serif);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-plex-mono);
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-bond: var(--bond);
+  --color-paper: var(--paper);
+  --color-seal: var(--seal);
+  --color-seal-dark: var(--seal-dark);
+  --color-ledger: var(--ledger);
+  --color-slate: var(--slate);
+  --color-rule: var(--rule);
+  --font-serif: var(--font-serif);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+body {
+  background: var(--bond);
+  color: var(--ink);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  /* rgba, not color-mix(): html2canvas (used for PDF export) can't parse color-mix(). */
+  background: rgba(178, 58, 46, 0.25);
+}
+
+/*
+ * Filled-in values inside the document read like typed entries on a paper
+ * form. No border-bottom here on purpose: html2canvas (used for PDF export)
+ * mispositions borders on inline spans that switch font-family mid-line,
+ * rendering as a strikethrough through the text instead of an underline.
+ */
+.doc-fill {
+  font-family: var(--font-mono);
+  font-size: 0.94em;
+  color: var(--seal-dark);
+  padding: 0 0.15em;
+}
+
+.doc-fill[data-empty="true"] {
+  color: var(--slate);
+  opacity: 0.55;
+}
+
+/* Keep a Standard Terms clause from being sliced across a PDF page boundary. */
+.print-sheet li {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+@keyframes seal-press {
+  0% {
+    transform: scale(1.5) rotate(-14deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.94) rotate(-6deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(-6deg);
+    opacity: 1;
+  }
+}
+
+.seal-sealed {
+  animation: seal-press 480ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seal-sealed {
+    animation: none;
+  }
+}
+
+@media print {
+  body {
+    background: #ffffff;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-sheet {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  /* Without this the preview pane's scroll box clips the contract to one page. */
+  .preview-scroll,
+  .preview-frame {
+    max-height: none !important;
+    overflow: visible !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+}
