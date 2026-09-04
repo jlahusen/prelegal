@@ -140,6 +140,7 @@ export default function Home() {
                 <DownloadButton
                   targetRef={documentRef}
                   filename={filename}
+                  documentName={spec.name}
                   disabled={!complete}
                 />
                 <SaveDraftButton onSave={save} status={status} />

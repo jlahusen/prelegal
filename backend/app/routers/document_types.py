@@ -39,10 +39,10 @@ def _document(spec: DocumentSpec, parsed: ParsedTemplate) -> DocumentTypeOut:
                 kind=entry.kind,
                 section=entry.section,
                 placeholder=entry.placeholder or entry.label,
-                choices=list(entry.choices),
                 default=entry.default,
                 shared=entry.shared,
                 inline=entry.inline,
+                optional=entry.optional,
                 required_unless=entry.required_unless,
             )
             for entry in spec.fields

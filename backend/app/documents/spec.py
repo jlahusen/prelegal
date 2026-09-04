@@ -8,7 +8,7 @@ copied here.
 from dataclasses import dataclass
 from typing import Literal
 
-Kind = Literal["text", "textarea", "date", "duration", "currency", "choice", "boolean"]
+Kind = Literal["text", "textarea", "date", "duration", "currency", "boolean"]
 Form = Literal["base", "possessive", "plural"]
 
 UNITS = ("days", "months", "years")
@@ -33,11 +33,11 @@ class Field:
     description: str
     spans: tuple[Span, ...] = ()
     placeholder: str = ""
-    choices: tuple[str, ...] = ()
     default: str = ""
     shared: str = ""
     absorbs_article: bool = False
     inline: bool = True
+    optional: bool = False
     required_unless: tuple[str, str] | None = None
 
     @property

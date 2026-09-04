@@ -20,9 +20,6 @@ function accepts(spec: DocumentType, path: string, value: string): boolean {
   if (field?.kind === "boolean") {
     return ["true", "false"].includes(value.trim().toLowerCase());
   }
-  if (field?.kind === "choice" && field.choices.length) {
-    return field.choices.includes(value.trim());
-  }
   return true;
 }
 

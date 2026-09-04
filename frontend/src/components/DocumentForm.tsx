@@ -121,22 +121,6 @@ function Control({
           onChange={(e) => set(field.key, e.target.value)}
         />
       );
-    case "choice":
-      return (
-        <select
-          id={id}
-          className={inputClasses}
-          value={value}
-          onChange={(e) => set(field.key, e.target.value)}
-        >
-          <option value="">Choose…</option>
-          {field.choices.map((choice) => (
-            <option key={choice} value={choice}>
-              {choice}
-            </option>
-          ))}
-        </select>
-      );
     default:
       return (
         <input

@@ -1,6 +1,9 @@
 """Mutual Non-Disclosure Agreement."""
 
+from app.documents import common
 from app.documents.spec import DocumentSpec, Field, Override, Span, party
+
+TERMS = "Agreement terms"
 
 SPEC = DocumentSpec(
     doc_type="Mutual-NDA.md",
@@ -21,7 +24,7 @@ SPEC = DocumentSpec(
             key="purpose",
             label="Purpose",
             kind="textarea",
-            section="Agreement terms",
+            section=TERMS,
             spans=(Span("Purpose"),),
             placeholder="Purpose",
             description=(
@@ -31,22 +34,12 @@ SPEC = DocumentSpec(
                 "the parties'"
             ),
         ),
-        Field(
-            key="effectiveDate",
-            label="Effective date",
-            kind="date",
-            section="Agreement terms",
-            spans=(Span("Effective Date"),),
-            placeholder="the Effective Date",
-            absorbs_article=True,
-            shared="effectiveDate",
-            description="Date the agreement starts, as yyyy-mm-dd",
-        ),
+        common.effective_date(TERMS),
         Field(
             key="mndaTerm",
             label="MNDA term",
             kind="duration",
-            section="Agreement terms",
+            section=TERMS,
             spans=(Span("MNDA Term"),),
             placeholder="the MNDA Term",
             absorbs_article=True,
@@ -57,7 +50,7 @@ SPEC = DocumentSpec(
             key="confidentialityPerpetual",
             label="Confidentiality lasts in perpetuity",
             kind="boolean",
-            section="Agreement terms",
+            section=TERMS,
             default="false",
             description=(
                 "'true' if confidentiality obligations last forever, otherwise "
@@ -68,7 +61,7 @@ SPEC = DocumentSpec(
             key="confidentialityTerm",
             label="Term of confidentiality",
             kind="duration",
-            section="Agreement terms",
+            section=TERMS,
             spans=(Span("Term of Confidentiality"),),
             placeholder="the Term of Confidentiality",
             absorbs_article=True,
@@ -83,7 +76,7 @@ SPEC = DocumentSpec(
             key="governingLaw",
             label="Governing law",
             kind="text",
-            section="Agreement terms",
+            section=TERMS,
             spans=(Span("Governing Law"),),
             placeholder="Governing Law",
             shared="governingLaw",
@@ -93,7 +86,7 @@ SPEC = DocumentSpec(
             key="jurisdiction",
             label="Jurisdiction",
             kind="text",
-            section="Agreement terms",
+            section=TERMS,
             spans=(Span("Jurisdiction"),),
             placeholder="the Jurisdiction",
             shared="jurisdiction",

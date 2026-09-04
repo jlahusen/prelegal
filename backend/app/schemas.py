@@ -83,10 +83,10 @@ class FieldOut(BaseModel):
     kind: str
     section: str
     placeholder: str
-    choices: list[str]
     default: str
     shared: str
     inline: bool
+    optional: bool
     required_unless: tuple[str, str] | None
 
 

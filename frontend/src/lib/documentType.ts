@@ -12,7 +12,6 @@ export type FieldKind =
   | "date"
   | "duration"
   | "currency"
-  | "choice"
   | "boolean";
 
 export interface FieldSpec {
@@ -22,7 +21,6 @@ export interface FieldSpec {
   section: string;
   /** Defined-term text shown in the document while the field is empty. */
   placeholder: string;
-  choices: string[];
   /** For a duration, "2 years". */
   default: string;
   /** Canonical name, so a value can survive a change of document type. */

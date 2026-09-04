@@ -66,6 +66,7 @@ def covered_claims(role: str, section: str = KEY_TERMS) -> Field:
         section=section,
         spans=(Span(f"{role} Covered Claim"), Span(f"{role} Covered Claims")),
         inline=False,
+        optional=True,
         description=f"Claims {role} indemnifies the other party against",
     )
 
@@ -84,6 +85,7 @@ def liability_terms(section: str = KEY_TERMS) -> tuple[Field, ...]:
         ),
         Field(
             key="increasedCapAmount",
+            optional=True,
             label="Increased cap amount",
             kind="currency",
             section=section,
@@ -94,6 +96,7 @@ def liability_terms(section: str = KEY_TERMS) -> tuple[Field, ...]:
         ),
         Field(
             key="increasedClaims",
+            optional=True,
             label="Increased claims",
             kind="textarea",
             section=section,
@@ -103,6 +106,7 @@ def liability_terms(section: str = KEY_TERMS) -> tuple[Field, ...]:
         ),
         Field(
             key="unlimitedClaims",
+            optional=True,
             label="Unlimited claims",
             kind="textarea",
             section=section,
@@ -121,6 +125,7 @@ def additional_warranties(section: str = KEY_TERMS) -> Field:
         section=section,
         spans=(Span("Additional Warranties"),),
         inline=False,
+        optional=True,
         description="Any warranties beyond the standard ones, if the parties agreed some",
     )
 
@@ -133,6 +138,7 @@ def dpa_term(section: str = KEY_TERMS) -> Field:
         section=section,
         spans=(Span("DPA"),),
         inline=False,
+        optional=True,
         description="The data processing agreement between the parties, if they have one",
     )
 

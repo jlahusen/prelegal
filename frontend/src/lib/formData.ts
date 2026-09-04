@@ -60,10 +60,6 @@ export function isComplete(spec: DocumentType, data: FormData): boolean {
   return spec.fields.every((field) => !isRequired(field, data) || isFilled(field, data));
 }
 
-export function missingFields(spec: DocumentType, data: FormData): FieldSpec[] {
-  return spec.fields.filter((field) => isRequired(field, data) && !isFilled(field, data));
-}
-
 export function formatDuration(value: string, unit: string): string {
   if (!value.trim()) return "";
   const label = Number(value) === 1 ? unit.replace(/s$/, "") : unit;

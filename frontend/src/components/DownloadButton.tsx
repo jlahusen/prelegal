@@ -5,12 +5,15 @@ import { useState, type RefObject } from "react";
 interface DownloadButtonProps {
   targetRef: RefObject<HTMLDivElement | null>;
   filename: string;
+  /** The agreement being downloaded, e.g. "Cloud Service Agreement". */
+  documentName: string;
   disabled: boolean;
 }
 
 export default function DownloadButton({
   targetRef,
   filename,
+  documentName,
   disabled,
 }: DownloadButtonProps) {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -60,7 +63,7 @@ export default function DownloadButton({
           ? "Preparing PDF…"
           : disabled
             ? "Fill in all fields to download"
-            : "Download NDA (PDF)"}
+            : `Download ${documentName} (PDF)`}
       </button>
       {error && (
         <p role="alert" className="mt-1.5 text-[0.8rem] text-seal-dark">
