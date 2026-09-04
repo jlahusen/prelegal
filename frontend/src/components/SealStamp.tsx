@@ -2,10 +2,12 @@ const TICKS = Array.from({ length: 20 }, (_, i) => (i * 360) / 20);
 
 interface SealStampProps {
   sealed: boolean;
+  /** Short name struck into the seal, e.g. "MNDA". */
+  label: string;
   className?: string;
 }
 
-export default function SealStamp({ sealed, className = "" }: SealStampProps) {
+export default function SealStamp({ sealed, label, className = "" }: SealStampProps) {
   return (
     <div className={`relative flex flex-col items-center gap-2 ${className}`}>
       <svg
@@ -59,7 +61,7 @@ export default function SealStamp({ sealed, className = "" }: SealStampProps) {
           fill={sealed ? "var(--paper)" : "var(--slate)"}
           opacity={sealed ? 1 : 0.6}
         >
-          MNDA
+          {label}
         </text>
       </svg>
       <span

@@ -1,6 +1,6 @@
 "use client";
 
-import type { DraftStatus } from "@/lib/useNdaDraft";
+import type { DraftStatus } from "@/lib/useDraft";
 
 const STATUS_LABEL: Record<DraftStatus, string> = {
   idle: "",

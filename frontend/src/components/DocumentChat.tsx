@@ -1,14 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { postNdaChat, type ChatMessage } from "@/lib/api";
-import { humanizeField, type NdaFieldUpdate } from "@/lib/ndaChat";
-import type { NdaFormData } from "@/lib/types";
+import { postChat, type ChatMessage } from "@/lib/api";
+import { humanizeField, type FieldUpdate } from "@/lib/documentChat";
+import type { DocumentType } from "@/lib/documentType";
+import type { FormData } from "@/lib/formData";
 
-interface NdaChatProps {
-  data: NdaFormData;
+interface DocumentChatProps {
+  spec: DocumentType;
+  data: FormData;
   /** Applied against the live form state, not the state this turn was sent with. */
-  onApply: (updates: NdaFieldUpdate[]) => void;
+  onApply: (updates: FieldUpdate[]) => void;
+  /** The assistant settled on a different agreement mid-conversation. */
+  onChooseDocument: (docType: string) => void;
 }
 
 interface Turn extends ChatMessage {
@@ -19,14 +23,22 @@ interface Turn extends ChatMessage {
 const GREETING: Turn = {
   role: "assistant",
   content:
-    "I can fill this NDA in for you. To start: what are the legal names of the two parties?",
+    "Tell me what you need and I will draft it. If you already know, say which " +
+    "agreement — otherwise describe the situation and I will suggest one.",
 };
 
-export default function NdaChat({ data, onApply }: NdaChatProps) {
+export default function DocumentChat({
+  spec,
+  data,
+  onApply,
+  onChooseDocument,
+}: DocumentChatProps) {
   const [turns, setTurns] = useState<Turn[]>([GREETING]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [failed, setFailed] = useState(false);
+  /** Until an agreement is settled, the assistant is choosing one, not filling one in. */
+  const [choosing, setChoosing] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -45,19 +57,27 @@ export default function NdaChat({ data, onApply }: NdaChatProps) {
     setFailed(false);
 
     try {
-      const answer = await postNdaChat(
+      const answer = await postChat(
+        choosing ? null : spec.doc_type,
         history.map(({ role, content }) => ({ role, content })),
         data,
       );
+
       setTurns([
         ...history,
         {
           role: "assistant",
           content: answer.reply,
-          filled: answer.updates.map((update) => humanizeField(update.field)),
+          filled: answer.updates.map((update) => humanizeField(spec, update.field)),
         },
       ]);
+
       if (answer.updates.length) onApply(answer.updates);
+
+      if (choosing && answer.doc_type) {
+        setChoosing(false);
+        if (answer.doc_type !== spec.doc_type) onChooseDocument(answer.doc_type);
+      }
     } catch {
       setFailed(true);
     } finally {
@@ -94,7 +114,11 @@ export default function NdaChat({ data, onApply }: NdaChatProps) {
             aria-label="Message"
             rows={2}
             className="w-full resize-none rounded-md border border-rule bg-paper px-3 py-2 text-[0.925rem] text-ink placeholder:text-[rgba(91,100,114,0.6)] transition-colors focus:border-seal focus:outline-none focus:ring-2 focus:ring-[rgba(178,58,46,0.4)]"
-            placeholder="Acme, Inc. and Globex LLC"
+            placeholder={
+              choosing
+                ? "We're sharing confidential information with a supplier"
+                : "Acme, Inc. and Globex LLC"
+            }
             value={input}
             disabled={sending}
             onChange={(e) => setInput(e.target.value)}
@@ -115,7 +139,7 @@ export default function NdaChat({ data, onApply }: NdaChatProps) {
           </button>
         </div>
         <p className="pt-2 font-mono text-[0.6rem] uppercase tracking-[0.2em] text-slate">
-          Answers fill the document as you go
+          {choosing ? "Describe what you need" : "Answers fill the document as you go"}
         </p>
       </div>
     </div>
