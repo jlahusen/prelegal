@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     database_path: Path = BACKEND_DIR / "prelegal.db"
     static_dir: Path = PROJECT_ROOT / "frontend" / "out"
     catalog_path: Path = PROJECT_ROOT / "catalog.json"
+    templates_dir: Path = PROJECT_ROOT / "templates"
     cors_origins: list[str] = ["http://localhost:3000"]
     openrouter_api_key: str = ""
 

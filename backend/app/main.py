@@ -9,17 +9,23 @@ from fastapi.staticfiles import StaticFiles
 from app import __version__
 from app.config import get_settings
 from app.db import reset_database
-from app.routers import catalog, chat, documents, health
+from app.routers import catalog, chat, document_types, documents, health
 from app.routers.catalog import load_catalog
+from app.routers.document_types import load_documents
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Start every run with an empty database and a freshly read catalog."""
+    """Start every run with an empty database, and the templates read in.
+
+    Parsing here means a template a spec no longer fits stops the app rather
+    than reaching someone's contract.
+    """
     settings = get_settings()
     reset_database(settings.database_path)
     app.state.database_path = settings.database_path
     app.state.catalog = load_catalog(settings.catalog_path)
+    app.state.documents = load_documents(settings.templates_dir)
     yield
 
 
@@ -34,7 +40,13 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    for router in (health.router, catalog.router, documents.router, chat.router):
+    for router in (
+        health.router,
+        catalog.router,
+        document_types.router,
+        documents.router,
+        chat.router,
+    ):
         app.include_router(router, prefix="/api")
 
     # Present only once the frontend has been built (always so in the container).
