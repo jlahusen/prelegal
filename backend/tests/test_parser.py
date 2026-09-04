@@ -1,0 +1,75 @@
+"""The parser turns a template into clauses without changing a word of it.
+
+The Mutual NDA is the baseline: its clauses were transcribed by hand before
+the parser existed, so parsing the same template must reproduce them.
+"""
+
+import pytest
+
+from app.documents.mutual_nda import SPEC
+from app.documents.parser import parse_template
+from app.documents.spec import DocumentSpec, Field, Override, Span
+
+TEMPLATE = "templates/Mutual-NDA.md"
+
+
+def clause(parsed, number):
+    return next(c for c in parsed.clauses if c.number == number)
+
+
+@pytest.fixture
+def nda(templates_dir):
+    return parse_template((templates_dir / "Mutual-NDA.md").read_text(encoding="utf-8"), SPEC)
+
+
+def test_every_numbered_clause_is_found(nda):
+    assert nda.title == "Standard Terms"
+    assert [c.number for c in nda.clauses] == [str(n) for n in range(1, 12)]
+    assert clause(nda, "9").title == "Governing Law and Jurisdiction"
+
+
+def test_no_span_markup_survives_parsing(nda):
+    assert not any("<span" in c.body for c in nda.clauses)
+
+
+def test_a_field_becomes_a_token(nda):
+    assert "in connection with the {{purpose}} which" in clause(nda, "1").body
+
+
+def test_a_field_that_absorbs_its_article_drops_it(nda):
+    """"commences on the Effective Date" must not become "on the 1 May 2026"."""
+    body = clause(nda, "5").body
+    assert body.startswith("This MNDA commences on {{effectiveDate}} and expires at the end of {{mndaTerm}}.")
+    assert "will survive for {{confidentialityTerm}}, despite" in body
+
+
+def test_a_repeated_term_reads_as_words_not_a_second_value(nda):
+    """Substituting twice would read "provisions of such Delaware"."""
+    body = clause(nda, "9").body
+    assert "the laws of the State of {{governingLaw}}, without regard to" in body
+    assert "conflict of laws provisions of such State." in body
+    assert "courts located in {{jurisdiction}}." in body
+    assert "exclusive jurisdiction of such courts in any such suit" in body
+
+
+def test_the_closing_attribution_is_not_part_of_the_last_clause(nda):
+    assert "CC BY 4.0" not in clause(nda, "11").body
+
+
+def test_a_span_the_spec_does_not_cover_stops_the_parse():
+    bare = DocumentSpec(doc_type="X.md", name="X", fields=(), attribution="")
+    with pytest.raises(KeyError, match="Surprise"):
+        parse_template('1. <span class="keyterms_link">Surprise</span>', bare)
+
+
+def test_an_override_only_fires_on_the_occurrence_it_names():
+    spec = DocumentSpec(
+        doc_type="X.md",
+        name="X",
+        attribution="",
+        fields=(Field(key="law", label="Law", kind="text", section="s",
+                      description="d", spans=(Span("Law"),)),),
+        overrides=(Override("Law", 2, "State"),),
+    )
+    raw = '1. of <span class="keyterms_link">Law</span> and such <span class="keyterms_link">Law</span>'
+    assert parse_template(raw, spec).clauses[0].body == "of {{law}} and such State"
