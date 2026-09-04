@@ -10,7 +10,7 @@ interface DocumentChatProps {
   spec: DocumentType;
   data: FormData;
   /** Applied against the live form state, not the state this turn was sent with. */
-  onApply: (updates: FieldUpdate[]) => void;
+  onApply: (updates: FieldUpdate[], forDocType: string) => void;
   /** The assistant settled on a different agreement mid-conversation. */
   onChooseDocument: (docType: string) => void;
 }
@@ -57,8 +57,9 @@ export default function DocumentChat({
     setFailed(false);
 
     try {
+      const sentFor = choosing ? null : spec.doc_type;
       const answer = await postChat(
-        choosing ? null : spec.doc_type,
+        sentFor,
         history.map(({ role, content }) => ({ role, content })),
         data,
       );
@@ -72,7 +73,7 @@ export default function DocumentChat({
         },
       ]);
 
-      if (answer.updates.length) onApply(answer.updates);
+      if (answer.updates.length && sentFor) onApply(answer.updates, sentFor);
 
       if (choosing && answer.doc_type) {
         setChoosing(false);

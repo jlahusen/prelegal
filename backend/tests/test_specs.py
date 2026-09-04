@@ -38,9 +38,19 @@ def test_the_spec_covers_every_span_in_its_template(spec, raw):
     assert parsed.clauses
 
 
+def bodies(clauses):
+    """Every clause's prose, however deeply the template nests it."""
+    for clause in clauses:
+        yield clause.body
+        yield from bodies(clause.children)
+
+
 def test_no_markup_survives(spec, raw):
-    parsed = parse_template(raw, spec)
-    assert "<span" not in " ".join(c.body for c in parsed.clauses)
+    """Most of these templates keep their prose in nested clauses, so this
+    has to walk the whole tree: a stray tag would otherwise reach a contract."""
+    prose = " ".join(bodies(parse_template(raw, spec).clauses))
+    assert "<span" not in prose
+    assert "</span" not in prose
 
 
 def test_clause_numbers_match_the_ids_the_template_gives(spec, raw):

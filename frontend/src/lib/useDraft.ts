@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   createDocument,
   fetchDocument,
@@ -36,6 +36,12 @@ export function useDraft() {
   const [data, setData] = useState<FormData>({});
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [status, setStatus] = useState<DraftStatus>("idle");
+  /** Read by applyUpdates, which can be called by a reply that predates a switch. */
+  const live = useRef<DocumentType | null>(null);
+
+  useEffect(() => {
+    live.current = spec;
+  }, [spec]);
 
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get("id");
@@ -91,16 +97,16 @@ export function useDraft() {
    * Merges assistant updates into whatever the form holds now.
    *
    * A reply can land after the user has edited the form, so this reads the
-   * current state rather than the state the request was sent with.
+   * current state rather than the state the request was sent with. A reply for
+   * an agreement they have since left is dropped: two documents can name a
+   * field alike and mean different things by it.
    */
-  const applyUpdates = useCallback(
-    (updates: FieldUpdate[]) => {
-      if (!spec) return;
-      setData((current) => merge(spec, current, updates));
-      setStatus("idle");
-    },
-    [spec],
-  );
+  const applyUpdates = useCallback((updates: FieldUpdate[], forDocType: string) => {
+    const current = live.current;
+    if (!current || current.doc_type !== forDocType) return;
+    setData((data) => merge(current, data, updates));
+    setStatus("idle");
+  }, []);
 
   /** What a switch to `docType` would discard, so the reader can be asked first. */
   const wouldLose = useCallback(

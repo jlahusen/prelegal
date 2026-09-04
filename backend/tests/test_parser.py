@@ -73,3 +73,34 @@ def test_an_override_only_fires_on_the_occurrence_it_names():
     )
     raw = '1. of <span class="keyterms_link">Law</span> and such <span class="keyterms_link">Law</span>'
     assert parse_template(raw, spec).clauses[0].body == "of {{law}} and such State"
+
+
+def spec_for(span_text, key="term"):
+    return DocumentSpec(
+        doc_type="X.md",
+        name="X",
+        attribution="",
+        fields=(Field(key=key, label="Term", kind="text", section="s",
+                      description="d", spans=(Span(span_text),)),),
+    )
+
+
+def test_a_fill_in_span_is_still_found_when_it_carries_an_id():
+    """SLA and CSA give some of their spans an id; they are fields all the same."""
+    raw = '1. For <span class="orderform_link" id="3.2.a">Uptime Credit</span> we pay'
+    parsed = parse_template(raw, spec_for("Uptime Credit"))
+    assert parsed.clauses[0].body == "For {{term}} we pay"
+
+
+def test_an_anchor_keeps_the_words_it_wraps():
+    """<span id="5.3.a">if</span> is a link target, not a fill-in point."""
+    raw = '1. <span id="5.3.a">if</span> the other party fails'
+    parsed = parse_template(raw, DocumentSpec(doc_type="X.md", name="X", fields=(), attribution=""))
+    assert parsed.clauses[0].body == "if the other party fails"
+
+
+def test_an_anchor_closed_twice_leaves_nothing_behind():
+    """CSA's definition of "Variable" has a doubled closing tag."""
+    raw = '1. <span id="13.34">**"Variable"**</span></span> means a word'
+    parsed = parse_template(raw, DocumentSpec(doc_type="X.md", name="X", fields=(), attribution=""))
+    assert parsed.clauses[0].body == '**"Variable"** means a word'
