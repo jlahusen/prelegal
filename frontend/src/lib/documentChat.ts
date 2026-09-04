@@ -14,6 +14,11 @@ export interface FieldUpdate {
   value: string;
 }
 
+/** Units and booleans are matched by exact string elsewhere, so they are stored canonically. */
+function isKeyword(spec: DocumentType, path: string): boolean {
+  return path.endsWith(".unit") || spec.fields.some((f) => f.key === path && f.kind === "boolean");
+}
+
 function accepts(spec: DocumentType, path: string, value: string): boolean {
   if (path.endsWith(".unit")) return isDurationUnit(value.trim());
   const field = spec.fields.find((entry) => entry.key === path);
@@ -33,7 +38,7 @@ export function applyUpdates(
 
   for (const { field, value } of updates) {
     if (!known.has(field) || !accepts(spec, field, value)) continue;
-    next[field] = field.endsWith(".unit") ? value.trim() : value;
+    next[field] = isKeyword(spec, field) ? value.trim().toLowerCase() : value;
   }
   return next;
 }

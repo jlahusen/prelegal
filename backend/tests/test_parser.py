@@ -104,3 +104,21 @@ def test_an_anchor_closed_twice_leaves_nothing_behind():
     raw = '1. <span id="13.34">**"Variable"**</span></span> means a word'
     parsed = parse_template(raw, DocumentSpec(doc_type="X.md", name="X", fields=(), attribution=""))
     assert parsed.clauses[0].body == '**"Variable"** means a word'
+
+
+def test_a_capitalised_article_is_absorbed_too():
+    """Six templates open a clause "The Governing Law will govern"."""
+    spec = DocumentSpec(
+        doc_type="X.md", name="X", attribution="",
+        fields=(Field(key="law", label="Law", kind="text", section="s", description="d",
+                      spans=(Span("Governing Law"),), absorbs_article=True),),
+    )
+    raw = '1. The <span class="keyterms_link">Governing Law</span> will govern this Agreement.'
+    assert parse_template(raw, spec).clauses[0].body == "{{law}} will govern this Agreement."
+
+
+def test_markdown_links_read_as_prose():
+    bare = DocumentSpec(doc_type="X.md", name="X", fields=(), attribution="")
+    raw = "1. posted at <https://commonpaper.com/x/> and [the standard](https://commonpaper.com/y)"
+    body = parse_template(raw, bare).clauses[0].body
+    assert body == "posted at https://commonpaper.com/x/ and the standard"

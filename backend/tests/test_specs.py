@@ -51,6 +51,8 @@ def test_no_markup_survives(spec, raw):
     prose = " ".join(bodies(parse_template(raw, spec).clauses))
     assert "<span" not in prose
     assert "</span" not in prose
+    assert "<http" not in prose
+    assert "](http" not in prose
 
 
 def test_clause_numbers_match_the_ids_the_template_gives(spec, raw):

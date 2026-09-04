@@ -20,8 +20,8 @@ function slugify(text: string): string {
 }
 
 /**
- * What gets struck into the seal: "Cloud Service Agreement" becomes "CSA",
- * and "Mutual Non-Disclosure Agreement" keeps its hyphenated word, "MNDA".
+ * What gets struck into the seal: "Cloud Service Agreement" becomes "CSA".
+ * Hyphens split like spaces, so "Non-Disclosure" gives two letters: "MNDA".
  */
 function initials(name: string): string {
   return name
@@ -33,7 +33,8 @@ function initials(name: string): string {
 }
 
 export default function Home() {
-  const { spec, data, update, applyUpdates, save, status, switchTo, wouldLose } = useDraft();
+  const { spec, data, chosen, update, applyUpdates, save, status, switchTo, wouldLose } =
+    useDraft();
   const [mobileView, setMobileView] = useState<"fill" | "preview">("fill");
   const [fillMode, setFillMode] = useState<"chat" | "form">("chat");
   const documentRef = useRef<HTMLDivElement>(null);
@@ -53,7 +54,7 @@ export default function Home() {
     return (
       <main className="flex min-h-screen items-center justify-center">
         <p className="font-mono text-[0.7rem] uppercase tracking-[0.2em] text-slate">
-          Loading…
+          {status === "error" ? "Couldn't reach the server" : "Loading…"}
         </p>
       </main>
     );
@@ -123,6 +124,7 @@ export default function Home() {
               <DocumentChat
                 spec={spec}
                 data={data}
+                chosen={chosen}
                 onApply={applyUpdates}
                 onChooseDocument={(next) => void switchTo(next)}
               />

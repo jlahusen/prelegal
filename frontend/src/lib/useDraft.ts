@@ -36,6 +36,8 @@ export function useDraft() {
   const [data, setData] = useState<FormData>({});
   const [documentId, setDocumentId] = useState<string | null>(null);
   const [status, setStatus] = useState<DraftStatus>("idle");
+  /** Whether the reader chose this agreement, as opposed to landing on the default. */
+  const [chosen, setChosen] = useState(false);
   /** Read by applyUpdates, which can be called by a reply that predates a switch. */
   const live = useRef<DocumentType | null>(null);
 
@@ -62,6 +64,7 @@ export function useDraft() {
         setSpec(type);
         setData({ ...emptyData(type), ...saved.data });
         setDocumentId(saved.id);
+        setChosen(true);
         setStatus("saved");
       })
       .catch(() => setStatus("error"));
@@ -124,6 +127,7 @@ export function useDraft() {
       const next = await fetchDocumentType(docType);
       setData((current) => carryOver(spec, current, next));
       setSpec(next);
+      setChosen(true);
       // The saved draft is that other agreement; this one starts unsaved.
       setDocumentId(null);
       setStatus("idle");
@@ -132,5 +136,5 @@ export function useDraft() {
     [spec],
   );
 
-  return { spec, data, update, applyUpdates, save, status, switchTo, wouldLose };
+  return { spec, data, chosen, update, applyUpdates, save, status, switchTo, wouldLose };
 }

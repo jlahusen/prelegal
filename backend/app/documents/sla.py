@@ -7,7 +7,8 @@ TERMS = "Service levels"
 
 
 def _target(key: str, label: str, span: str, description: str) -> Field:
-    """Uptime and response targets are defined terms: "at least the Target Uptime"."""
+    """Targets and credits are defined terms: "at least the Target Uptime",
+    "eligible to receive an Uptime Credit". Their values sit on the cover page."""
     return Field(
         key=key,
         label=label,
@@ -46,26 +47,10 @@ SPEC = DocumentSpec(
             absorbs_article=True,
             description="Where support requests are sent, e.g. 'support@acme.com'",
         ),
-        Field(
-            key="uptimeCredit",
-            label="Uptime credit",
-            kind="text",
-            section=TERMS,
-            spans=(Span("Uptime Credit"),),
-            placeholder="an Uptime Credit",
-            absorbs_article=True,
-            description="Credit owed when uptime falls short, e.g. '5% of monthly fees'",
-        ),
-        Field(
-            key="responseTimeCredit",
-            label="Response time credit",
-            kind="text",
-            section=TERMS,
-            spans=(Span("Response Time Credit"),),
-            placeholder="a Response Time Credit",
-            absorbs_article=True,
-            description="Credit owed when a support response is late",
-        ),
+        _target("uptimeCredit", "Uptime credit", "Uptime Credit",
+                "Credit owed when uptime falls short, e.g. '5% of monthly fees'"),
+        _target("responseTimeCredit", "Response time credit", "Response Time Credit",
+                "Credit owed when a support response is late"),
         Field(
             key="subscriptionPeriod",
             label="Subscription period",

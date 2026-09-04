@@ -9,6 +9,8 @@ import type { FormData } from "@/lib/formData";
 interface DocumentChatProps {
   spec: DocumentType;
   data: FormData;
+  /** The reader already picked this agreement, so there is nothing to choose. */
+  chosen: boolean;
   /** Applied against the live form state, not the state this turn was sent with. */
   onApply: (updates: FieldUpdate[], forDocType: string) => void;
   /** The assistant settled on a different agreement mid-conversation. */
@@ -30,6 +32,7 @@ const GREETING: Turn = {
 export default function DocumentChat({
   spec,
   data,
+  chosen,
   onApply,
   onChooseDocument,
 }: DocumentChatProps) {
@@ -37,8 +40,10 @@ export default function DocumentChat({
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [failed, setFailed] = useState(false);
+  /** Set once this conversation has settled on an agreement of its own. */
+  const [settled, setSettled] = useState(false);
   /** Until an agreement is settled, the assistant is choosing one, not filling one in. */
-  const [choosing, setChoosing] = useState(true);
+  const choosing = !chosen && !settled;
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -76,7 +81,7 @@ export default function DocumentChat({
       if (answer.updates.length && sentFor) onApply(answer.updates, sentFor);
 
       if (choosing && answer.doc_type) {
-        setChoosing(false);
+        setSettled(true);
         if (answer.doc_type !== spec.doc_type) onChooseDocument(answer.doc_type);
       }
     } catch {

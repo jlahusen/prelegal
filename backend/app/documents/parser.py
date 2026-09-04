@@ -19,13 +19,17 @@ LIST_ITEM = re.compile(r"^( *)(\d+|[ivx]+|[a-z])\.[ \t]+(.*)$")
 HEADER_SPAN = re.compile(r'^<span class="header_\d"(?: id="[^"]*")?>(.*?)</span>\s*(.*)$')
 BOLD_TITLE = re.compile(r"^\*\*(.+?)\*\*\.\s*(.*)$")
 LINK_SPAN = re.compile(
-    r'(?:\b(the|a|an) )?<span class="\w+_link"(?: id="[^"]*")?>(.*?)</span>'
+    r'(?:\b([Tt]he|[Aa]n?) )?<span class="\w+_link"(?: id="[^"]*")?>(.*?)</span>'
 )
 # Anchors that only carry an id, wrapping a word or nothing at all.
 ANCHOR_SPAN = re.compile(r'<span id="[^"]*">(.*?)</span>')
 # CSA's definition of "Variable" closes its anchor twice. Nothing should
 # carry a stray tag into a contract, so the extra one goes.
 STRAY_CLOSE = re.compile(r"</span>")
+# Markdown links: <https://...> autolinks and [text](url). The document is
+# prose, so an autolink reads as its address and a link as its text.
+AUTOLINK = re.compile(r"<(https?://[^>]+)>")
+MD_LINK = re.compile(r"\[([^\]]+)\]\(https?://[^)]+\)")
 SUFFIX = {"base": "", "possessive": "__poss", "plural": "__pl"}
 INDENT = 4
 
@@ -79,7 +83,8 @@ def _tokenise(body: str, spec: DocumentSpec, counts: dict[str, int]) -> str:
         return lead + "{{" + entry.key + SUFFIX[form] + "}}"
 
     text = ANCHOR_SPAN.sub(r"\1", LINK_SPAN.sub(replace, body))
-    return STRAY_CLOSE.sub("", text)
+    text = STRAY_CLOSE.sub("", text)
+    return MD_LINK.sub(r"\1", AUTOLINK.sub(r"\1", text))
 
 
 class _Node:
