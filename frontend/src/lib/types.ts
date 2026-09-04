@@ -42,7 +42,8 @@ export const emptyNdaFormData: NdaFormData = {
   jurisdiction: "",
 };
 
-const REQUIRED_PARTY_FIELDS: (keyof PartyInfo)[] = [
+/** Every field a party has. Both parties must have all of them filled in. */
+export const PARTY_FIELDS: (keyof PartyInfo)[] = [
   "name",
   "address",
   "signatoryName",
@@ -50,7 +51,7 @@ const REQUIRED_PARTY_FIELDS: (keyof PartyInfo)[] = [
 ];
 
 export function isPartyComplete(party: PartyInfo): boolean {
-  return REQUIRED_PARTY_FIELDS.every((field) => party[field].trim().length > 0);
+  return PARTY_FIELDS.every((field) => party[field].trim().length > 0);
 }
 
 /** A duration has to be a real, positive number — "0" and "-3" are not terms. */

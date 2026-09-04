@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import NdaForm from "@/components/NdaForm";
+import NdaChat from "@/components/NdaChat";
 import NdaDocument from "@/components/NdaDocument";
 import SealStamp from "@/components/SealStamp";
 import DownloadButton from "@/components/DownloadButton";
@@ -18,8 +19,9 @@ function slugify(text: string): string {
 }
 
 export default function Home() {
-  const { data, update, save, status } = useNdaDraft();
+  const { data, update, applyUpdates, save, status } = useNdaDraft();
   const [mobileView, setMobileView] = useState<"fill" | "preview">("fill");
+  const [fillMode, setFillMode] = useState<"chat" | "form">("chat");
   const documentRef = useRef<HTMLDivElement>(null);
 
   const complete = useMemo(() => isNdaComplete(data), [data]);
@@ -73,8 +75,31 @@ export default function Home() {
         <section
           className={`${mobileView === "fill" ? "block" : "hidden"} lg:block`}
         >
-          <div className="lg:sticky lg:top-8 space-y-6">
-            <NdaForm data={data} onChange={update} />
+          <div className="lg:sticky lg:top-8 space-y-4">
+            <div className="flex gap-1 rounded-md border border-rule p-1">
+              {(["chat", "form"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setFillMode(mode)}
+                  className={`flex-1 rounded px-3 py-1.5 font-mono text-[0.65rem] uppercase tracking-[0.2em] transition-colors ${
+                    fillMode === mode
+                      ? "bg-seal text-paper"
+                      : "text-slate hover:text-ink"
+                  }`}
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
+
+            {/* Both stay mounted so the conversation survives a tab switch. */}
+            <div className={fillMode === "chat" ? "block" : "hidden"}>
+              <NdaChat data={data} onApply={applyUpdates} />
+            </div>
+            <div className={fillMode === "form" ? "block" : "hidden"}>
+              <NdaForm data={data} onChange={update} />
+            </div>
           </div>
         </section>
 
