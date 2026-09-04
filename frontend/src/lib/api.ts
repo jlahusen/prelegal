@@ -5,6 +5,9 @@
  * local backend, set NEXT_PUBLIC_API_BASE_URL=http://localhost:8000.
  */
 
+import type { NdaFieldUpdate } from "@/lib/ndaChat";
+import type { NdaFormData } from "@/lib/types";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
 export interface CatalogEntry {
@@ -61,5 +64,26 @@ export function updateDocument<T>(
   return request(`/documents/${id}`, {
     method: "PUT",
     body: JSON.stringify(input),
+  });
+}
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export interface NdaChatResponse {
+  reply: string;
+  updates: NdaFieldUpdate[];
+}
+
+/** Sends the whole conversation: the chat endpoint keeps no state of its own. */
+export function postNdaChat(
+  messages: ChatMessage[],
+  current: NdaFormData,
+): Promise<NdaChatResponse> {
+  return request("/chat/mutual-nda", {
+    method: "POST",
+    body: JSON.stringify({ messages, current }),
   });
 }

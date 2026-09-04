@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from app import __version__
 from app.config import get_settings
 from app.db import reset_database
-from app.routers import catalog, documents, health
+from app.routers import catalog, chat, documents, health
 from app.routers.catalog import load_catalog
 
 
@@ -34,7 +34,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    for router in (health.router, catalog.router, documents.router):
+    for router in (health.router, catalog.router, documents.router, chat.router):
         app.include_router(router, prefix="/api")
 
     # Present only once the frontend has been built (always so in the container).

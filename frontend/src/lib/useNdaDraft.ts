@@ -7,6 +7,7 @@ import {
   updateDocument,
   type DocumentInput,
 } from "@/lib/api";
+import { applyNdaUpdates, type NdaFieldUpdate } from "@/lib/ndaChat";
 import { emptyNdaFormData, type NdaFormData } from "@/lib/types";
 
 export type DraftStatus = "idle" | "saving" | "saved" | "error";
@@ -68,5 +69,16 @@ export function useNdaDraft() {
     setStatus("idle");
   }, []);
 
-  return { data, update, save, status };
+  /**
+   * Merges assistant updates into whatever the form holds now.
+   *
+   * A reply can land after the user has edited the form, so this reads the
+   * current state rather than the state the request was sent with.
+   */
+  const applyUpdates = useCallback((updates: NdaFieldUpdate[]) => {
+    setData((current) => applyNdaUpdates(current, updates));
+    setStatus("idle");
+  }, []);
+
+  return { data, update, applyUpdates, save, status };
 }
