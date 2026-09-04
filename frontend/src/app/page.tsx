@@ -5,7 +5,9 @@ import NdaForm from "@/components/NdaForm";
 import NdaDocument from "@/components/NdaDocument";
 import SealStamp from "@/components/SealStamp";
 import DownloadButton from "@/components/DownloadButton";
-import { emptyNdaFormData, isNdaComplete, type NdaFormData } from "@/lib/types";
+import SaveDraftButton from "@/components/SaveDraftButton";
+import { isNdaComplete } from "@/lib/types";
+import { useNdaDraft } from "@/lib/useNdaDraft";
 
 function slugify(text: string): string {
   return text
@@ -16,7 +18,7 @@ function slugify(text: string): string {
 }
 
 export default function Home() {
-  const [data, setData] = useState<NdaFormData>(emptyNdaFormData);
+  const { data, update, save, status } = useNdaDraft();
   const [mobileView, setMobileView] = useState<"fill" | "preview">("fill");
   const documentRef = useRef<HTMLDivElement>(null);
 
@@ -72,7 +74,7 @@ export default function Home() {
           className={`${mobileView === "fill" ? "block" : "hidden"} lg:block`}
         >
           <div className="lg:sticky lg:top-8 space-y-6">
-            <NdaForm data={data} onChange={setData} />
+            <NdaForm data={data} onChange={update} />
           </div>
         </section>
 
@@ -81,12 +83,13 @@ export default function Home() {
         >
           <div className="lg:sticky lg:top-8 space-y-4">
             <div className="flex items-start justify-between gap-4 no-print">
-              <div className="max-w-xs">
+              <div className="max-w-xs space-y-2">
                 <DownloadButton
                   targetRef={documentRef}
                   filename={filename}
                   disabled={!complete}
                 />
+                <SaveDraftButton onSave={save} status={status} />
               </div>
               <SealStamp sealed={complete} />
             </div>
