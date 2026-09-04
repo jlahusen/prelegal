@@ -65,6 +65,8 @@ def _tokenise(body: str, spec: DocumentSpec, counts: dict[str, int]) -> str:
         if literal is not None:
             return f"{lead}{literal}"
         entry, form = spec.field_for(text)
+        if not entry.inline:
+            return f"{lead}{text}"
         if entry.absorbs_article:
             lead = ""
         return lead + "{{" + entry.key + SUFFIX[form] + "}}"

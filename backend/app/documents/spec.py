@@ -37,6 +37,7 @@ class Field:
     default: str = ""
     shared: str = ""
     absorbs_article: bool = False
+    inline: bool = True
     required_unless: tuple[str, str] | None = None
 
     @property
@@ -104,12 +105,28 @@ PARTY_PARTS = (
 )
 
 
-def party(key: str, label: str, index: int, name_spans: tuple[Span, ...] = ()) -> tuple[Field, ...]:
+def party(
+    key: str,
+    label: str,
+    index: int,
+    role_word: str = "",
+) -> tuple[Field, ...]:
     """The four fields every party needs, in the order they are signed for.
 
-    `name_spans` are the template spans naming this party in the prose, so a
-    clause reads "Acme, Inc. may access the Product" once the name is known.
+    `role_word` is what the template calls this party in its prose ("Customer",
+    "Provider"). Every form of it -- plain, possessive, plural -- resolves to
+    this party's name, so a clause reads "Acme, Inc. may access the Product"
+    once the name is known. Both apostrophes are listed because the templates
+    are inconsistent about which one they use.
     """
+    spans: tuple[Span, ...] = ()
+    if role_word:
+        spans = (
+            Span(role_word),
+            Span(f"{role_word}’s", "possessive"),
+            Span(f"{role_word}'s", "possessive"),
+            Span(f"{role_word}s", "plural"),
+        )
     return tuple(
         Field(
             key=f"{key}.{part}",
@@ -117,8 +134,8 @@ def party(key: str, label: str, index: int, name_spans: tuple[Span, ...] = ()) -
             kind="text",
             section=label,
             description=description.format(label=label),
-            spans=name_spans if part == "name" else (),
-            placeholder=label if part == "name" else "",
+            spans=spans if part == "name" else (),
+            placeholder=role_word or label,
             shared=f"party{index}.{part}",
         )
         for part, heading, description in PARTY_PARTS
