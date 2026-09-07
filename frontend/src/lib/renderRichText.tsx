@@ -7,11 +7,12 @@ export interface FillValue {
   placeholder: string;
 }
 
-const TOKEN_PATTERN = /(\*\*[^*]+\*\*|\{\{\w+\}\})/g;
+const TOKEN_PATTERN = /(\*\*[^*]+\*\*|\{\{[\w.]+\}\})/g;
 
 /**
  * Renders **bold** markdown spans and {{token}} cover-page placeholders from
- * the Standard Terms into React nodes. An unfilled token reads as its defined
+ * the Standard Terms into React nodes. A token names a field by its dotted
+ * path, so {{customer.name}} and {{customer.name__poss}} both resolve here. An unfilled token reads as its defined
  * term ("commences on the Effective Date"), and a filled one substitutes the
  * value in its place ("commences on September 1, 2026") — so the clause is
  * grammatical either way, with no duplicated article.
@@ -27,7 +28,7 @@ export function renderRichText(
       return <strong key={i}>{part.slice(2, -2)}</strong>;
     }
 
-    const tokenMatch = /^\{\{(\w+)\}\}$/.exec(part);
+    const tokenMatch = /^\{\{([\w.]+)\}\}$/.exec(part);
     if (tokenMatch) {
       const fill = values[tokenMatch[1]];
       if (!fill) return null;

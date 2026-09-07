@@ -24,7 +24,7 @@ container discards every draft**. That is deliberate for now.
 ## Layout
 
 - [`backend/`](backend/) — FastAPI app: the JSON API under `/api`, and it serves the built frontend.
-- [`frontend/`](frontend/) — Next.js Mutual NDA Creator, exported to static files at build time.
+- [`frontend/`](frontend/) — Next.js agreement drafter, exported to static files at build time.
 - [`templates/`](templates/) — the underlying Common Paper legal agreement templates.
 - [`catalog.json`](catalog.json) — the agreement types the product offers, served by `/api/catalog`.
 

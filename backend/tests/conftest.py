@@ -1,5 +1,7 @@
 """Shared fixtures: every test gets its own throwaway database."""
 
+from pathlib import Path
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -30,3 +32,8 @@ def draft():
         "title": "Acme / Globex NDA",
         "data": {"partyA": {"name": "Acme"}, "purpose": "Evaluating a partnership"},
     }
+
+
+@pytest.fixture
+def templates_dir():
+    return Path(__file__).resolve().parents[2] / "templates"

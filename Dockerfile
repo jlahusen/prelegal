@@ -18,12 +18,14 @@ RUN uv sync --frozen --no-dev
 
 COPY backend/app ./app
 COPY catalog.json ./catalog.json
+COPY templates ./templates
 COPY --from=frontend /build/out ./static
 
 ENV PATH="/app/.venv/bin:$PATH" \
     DATABASE_PATH=/data/prelegal.db \
     STATIC_DIR=/app/static \
-    CATALOG_PATH=/app/catalog.json
+    CATALOG_PATH=/app/catalog.json \
+    TEMPLATES_DIR=/app/templates
 
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
