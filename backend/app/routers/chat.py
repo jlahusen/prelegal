@@ -1,7 +1,9 @@
 """Chat that fills in a draft. Stateless: the client sends the whole conversation.
 
 Without a doc_type the conversation is still about which agreement to draft,
-so it goes to the intake prompt instead of a document's own.
+so it goes to the intake prompt instead of a document's own. Once intake
+settles on one, the same turn goes on to that document's chat, so the reply
+already asks the first questions instead of stopping at the choice.
 """
 
 from fastapi import APIRouter, HTTPException, Request, status
@@ -16,7 +18,11 @@ router = APIRouter(prefix="/chat", tags=["chat"])
 @router.post("")
 def chat(payload: ChatRequest, request: Request) -> ChatResponse:
     if payload.doc_type is None:
-        return intake_chat.run_chat(payload.messages, request.app.state.catalog)
+        choice = intake_chat.run_chat(payload.messages, request.app.state.catalog)
+        if choice.doc_type is None:
+            return choice
+        spec = registry.get(choice.doc_type)
+        return document_chat.run_chat(spec, payload.messages, document_chat.defaults(spec))
     try:
         spec = registry.get(payload.doc_type)
     except KeyError:

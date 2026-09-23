@@ -22,7 +22,7 @@ Use Structured Outputs so that you can interpret the results and populate fields
 
 There is an OPENROUTER_API_KEY in the .env file in the project root.  
 
-The openrouter API should call the `@preset/prelegal` preset only.  
+The openrouter API should call the `@preset/pre-legal` preset only.  
 
 ## Technical design
 

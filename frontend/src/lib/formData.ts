@@ -95,48 +95,8 @@ export function displayValue(field: FieldSpec, data: FormData): string {
   }
 }
 
-/**
- * Carries what it can into another agreement.
- *
- * Fields match on their shared name, so the parties, the effective date and
- * the governing law survive a change of document type even though the two
- * documents call them different things.
- */
-export function carryOver(from: DocumentType, data: FormData, to: DocumentType): FormData {
-  const kept = emptyData(to);
-  const byShared = new Map(
-    from.fields.filter((field) => field.shared).map((field) => [field.shared, field]),
-  );
-
-  for (const field of to.fields) {
-    const source = field.shared ? byShared.get(field.shared) : undefined;
-    if (!source || source.kind !== field.kind) continue;
-    for (const [index, path] of pathsOf(field).entries()) {
-      const value = data[pathsOf(source)[index]];
-      if (value) kept[path] = value;
-    }
-  }
-  return kept;
-}
-
-/** Whether a field still holds the value it started with. */
-function isDefault(field: FieldSpec, data: FormData): boolean {
-  if (field.kind === "duration") {
-    const [value, unit] = field.default.split(" ");
-    return data[`${field.key}.value`] === value && data[`${field.key}.unit`] === unit;
-  }
-  return (data[field.key] ?? "") === field.default;
-}
-
-/** What the reader would lose by switching, named so they can decide. */
-export function lostBySwitching(from: DocumentType, data: FormData, to: DocumentType): string[] {
-  const wanted = new Map(
-    to.fields.filter((field) => field.shared).map((field) => [field.shared, field.kind]),
-  );
-
-  return from.fields
-    .filter((field) => field.kind !== "boolean" && isFilled(field, data))
-    .filter((field) => !isDefault(field, data))
-    .filter((field) => !field.shared || wanted.get(field.shared) !== field.kind)
-    .map((field) => field.label);
+/** Whether anything differs from a fresh form, so switching away would lose work. */
+export function hasProgress(spec: DocumentType, data: FormData): boolean {
+  const fresh = emptyData(spec);
+  return Object.keys(fresh).some((path) => (data[path] ?? "") !== fresh[path]);
 }

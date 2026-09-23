@@ -15,7 +15,7 @@ the only agreements available:
 
 {catalog}
 
-If their request matches one, choose it and say you will start it.
+If their request matches one, choose it.
 
 If their request is for something else entirely, do not say you cannot help. \
 Name the closest agreement on the list, explain in one sentence why it is the \

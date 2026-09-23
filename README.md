@@ -25,8 +25,10 @@ obvious ones. Switching tabs keeps the conversation.
 reads [`catalog.json`](catalog.json) and works out which agreement you need. Ask for something
 that isn't on the menu and it names the closest fit and explains the difference rather than
 refusing — the response schema gives it no way to name anything else. Once an agreement is
-settled it switches to *drafting*: it asks about that document's fields a couple at a time and
-reports back the values it recorded.
+settled it switches to *drafting* in the same turn: it asks about that document's fields a
+couple at a time, reports back the values it recorded, and keeps asking until every field is
+filled. Ask it for a different agreement mid-draft and it warns that your progress will be lost,
+switching only once you confirm.
 
 **Structured outputs, not free text.** Every OpenRouter call is a `json_schema` request in
 strict mode. In drafting mode the schema's `enum` is the list of field paths the current
@@ -43,8 +45,9 @@ required field is filled.
 `mutual-non-disclosure-agreement-acme-initech.pdf`.
 
 **Saved drafts and document switching.** Saving puts a draft id in the URL, so the link
-reopens it. Switching agreement types carries over the fields the two have in common and tells
-you first what would be lost.
+reopens it. Switching agreement types starts the new one from a blank draft. If anything has
+been filled in, by hand or through the chat, you are asked to confirm first, in a modal or in
+the chat.
 
 ## The agreements
 
@@ -62,7 +65,7 @@ All eleven are [Common Paper](https://commonpaper.com/) standards, used under CC
 | Backend | Python 3.13, FastAPI, Pydantic, [uv](https://docs.astral.sh/uv/) |
 | Frontend | Next.js 16 (static export), React 19, TypeScript, Tailwind CSS 4 |
 | Database | SQLite, recreated on every start |
-| AI | OpenRouter with structured outputs, via the `@preset/prelegal` preset |
+| AI | OpenRouter with structured outputs, via the `@preset/pre-legal` preset |
 | PDF | `html2pdf.js`, in the browser |
 | Packaging | One Docker image: the frontend is built to static files and served by FastAPI |
 

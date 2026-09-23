@@ -11,10 +11,12 @@ interface DocumentChatProps {
   data: FormData;
   /** The reader already picked this agreement, so there is nothing to choose. */
   chosen: boolean;
+  /** Something has been entered, so switching agreement would lose it. */
+  dirty: boolean;
   /** Applied against the live form state, not the state this turn was sent with. */
   onApply: (updates: FieldUpdate[], forDocType: string) => void;
-  /** The assistant settled on a different agreement mid-conversation. */
-  onChooseDocument: (docType: string) => void;
+  /** The assistant started a different agreement, and may have filled some of it in. */
+  onChooseDocument: (docType: string, updates: FieldUpdate[]) => void;
 }
 
 interface Turn extends ChatMessage {
@@ -29,21 +31,36 @@ const GREETING: Turn = {
     "agreement — otherwise describe the situation and I will suggest one.",
 };
 
+/** The opening once the reader has picked an agreement themselves. */
+function greetingFor(spec: DocumentType): Turn {
+  return {
+    role: "assistant",
+    content:
+      `Let's draft your ${spec.name}. Tell me who the parties are and what it is ` +
+      "for, and I will ask for everything else it needs.",
+  };
+}
+
 export default function DocumentChat({
   spec,
   data,
   chosen,
+  dirty,
   onApply,
   onChooseDocument,
 }: DocumentChatProps) {
-  const [turns, setTurns] = useState<Turn[]>([GREETING]);
+  const [turns, setTurns] = useState<Turn[]>(() => [chosen ? greetingFor(spec) : GREETING]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [failed, setFailed] = useState(false);
   /** Set once this conversation has settled on an agreement of its own. */
   const [settled, setSettled] = useState(false);
-  /** Until an agreement is settled, the assistant is choosing one, not filling one in. */
-  const choosing = !chosen && !settled;
+  /**
+   * Until an agreement is settled, the assistant is choosing one, not filling
+   * one in. Work already typed into the form settles it too, so asking for
+   * another agreement gets the drafting chat's warning before anything is lost.
+   */
+  const choosing = !chosen && !settled && !dirty;
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -69,21 +86,24 @@ export default function DocumentChat({
         data,
       );
 
-      setTurns([
-        ...history,
-        {
-          role: "assistant",
-          content: answer.reply,
-          filled: answer.updates.map((update) => humanizeField(spec, update.field)),
-        },
-      ]);
+      // A reply can answer for a different agreement than the one on screen:
+      // either the first one chosen, or one the user confirmed switching to.
+      const answeredFor = answer.doc_type ?? sentFor;
+      const switching = answeredFor !== null && answeredFor !== spec.doc_type;
+      const reply: Turn = {
+        role: "assistant",
+        content: answer.reply,
+        // Labels come from the agreement on screen, which a switch has not replaced yet.
+        filled: switching ? [] : answer.updates.map((u) => humanizeField(spec, u.field)),
+      };
 
-      if (answer.updates.length && sentFor) onApply(answer.updates, sentFor);
+      // Leaving a draft starts over, so the old conversation goes with the old data.
+      setTurns(switching && !choosing ? [reply] : [...history, reply]);
 
-      if (choosing && answer.doc_type) {
-        setSettled(true);
-        if (answer.doc_type !== spec.doc_type) onChooseDocument(answer.doc_type);
-      }
+      if (choosing && answer.doc_type) setSettled(true);
+
+      if (switching) onChooseDocument(answeredFor, answer.updates);
+      else if (answer.updates.length && answeredFor) onApply(answer.updates, answeredFor);
     } catch {
       setFailed(true);
     } finally {

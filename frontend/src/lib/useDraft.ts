@@ -10,7 +10,7 @@ import {
 } from "@/lib/api";
 import { applyUpdates as merge, type FieldUpdate } from "@/lib/documentChat";
 import type { DocumentType } from "@/lib/documentType";
-import { carryOver, emptyData, lostBySwitching, type FormData } from "@/lib/formData";
+import { emptyData, hasProgress, type FormData } from "@/lib/formData";
 
 export type DraftStatus = "idle" | "saving" | "saved" | "error";
 
@@ -111,30 +111,24 @@ export function useDraft() {
     setStatus("idle");
   }, []);
 
-  /** What a switch to `docType` would discard, so the reader can be asked first. */
-  const wouldLose = useCallback(
-    async (docType: string) => {
-      if (!spec) return [];
-      return lostBySwitching(spec, data, await fetchDocumentType(docType));
-    },
-    [spec, data],
-  );
+  /** Whether switching agreement would throw away anything entered so far. */
+  const dirty = spec ? hasProgress(spec, data) : false;
 
-  /** Moves to another agreement, keeping the values the two have in common. */
-  const switchTo = useCallback(
-    async (docType: string) => {
-      if (!spec || docType === spec.doc_type) return;
-      const next = await fetchDocumentType(docType);
-      setData((current) => carryOver(spec, current, next));
-      setSpec(next);
-      setChosen(true);
-      // The saved draft is that other agreement; this one starts unsaved.
-      setDocumentId(null);
-      setStatus("idle");
-      window.history.replaceState(null, "", window.location.pathname);
-    },
-    [spec],
-  );
+  /**
+   * Starts `docType` from a blank form, as a fresh unsaved draft.
+   *
+   * Nothing carries over from the agreement being left. `updates` are fields
+   * the chat settled for the new agreement in the same turn that chose it.
+   */
+  const startOver = useCallback(async (docType: string, updates: FieldUpdate[] = []) => {
+    const next = await fetchDocumentType(docType);
+    setData(merge(next, emptyData(next), updates));
+    setSpec(next);
+    setChosen(true);
+    setDocumentId(null);
+    setStatus("idle");
+    window.history.replaceState(null, "", window.location.pathname);
+  }, []);
 
-  return { spec, data, chosen, update, applyUpdates, save, status, switchTo, wouldLose };
+  return { spec, data, chosen, dirty, update, applyUpdates, save, status, startOver };
 }

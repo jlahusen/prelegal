@@ -26,7 +26,8 @@ def reply(monkeypatch):
         sent["messages"] = messages
         sent["schema_name"] = schema_name
         sent["schema"] = schema
-        return sent["answer"]
+        sent.setdefault("calls", []).append({"messages": messages, "schema": schema})
+        return sent.get("answers", {}).get(schema_name, sent["answer"])
 
     monkeypatch.setattr(document_chat, "complete", fake_complete)
     monkeypatch.setattr(intake_chat, "complete", fake_complete)
@@ -212,8 +213,81 @@ def test_the_model_may_only_choose_an_agreement_we_have(client, reply):
     response = client.post("/api/chat", json={"messages": [{"role": "user", "content": "ok"}]})
 
     assert response.json()["doc_type"] == "Pilot-Agreement.md"
-    choices = reply["schema"]["properties"]["doc_type"]["enum"]
+    choices = reply["calls"][0]["schema"]["properties"]["doc_type"]["enum"]
     assert set(choices) == set(registry.SPECS) | {None}
+
+
+def test_choosing_an_agreement_goes_straight_on_to_its_first_questions(client, reply):
+    """The chat must not stop at the choice: the same turn asks what the form needs."""
+    reply["answers"] = {
+        "document_intake_turn": {"reply": "I'll start that.", "doc_type": "CSA.md"},
+        "document_chat_turn": {
+            "reply": "Starting your Cloud Service Agreement. Who is the customer?",
+            "updates": [{"field": "provider.name", "value": "Acme, Inc."}],
+        },
+    }
+
+    response = client.post(
+        "/api/chat",
+        json={"messages": [{"role": "user", "content": "Acme, Inc. is selling SaaS"}]},
+    )
+
+    assert response.json() == {
+        "reply": "Starting your Cloud Service Agreement. Who is the customer?",
+        "doc_type": "CSA.md",
+        "updates": [{"field": "provider.name", "value": "Acme, Inc."}],
+    }
+    drafting = reply["calls"][1]["messages"]
+    assert "Cloud Service Agreement" in drafting[0]["content"]
+    assert drafting[-1]["content"] == "Acme, Inc. is selling SaaS"
+
+
+def test_a_chosen_agreement_starts_from_its_own_defaults(client, reply):
+    """What the old form held belongs to another agreement, so it is not passed on."""
+    reply["answer"] = {"reply": "ok", "doc_type": "CSA.md", "updates": []}
+
+    client.post(
+        "/api/chat",
+        json={
+            "messages": [{"role": "user", "content": "a SaaS deal"}],
+            "current": {"governingLaw": "Narnia"},
+        },
+    )
+
+    prompt = reply["calls"][1]["messages"][0]["content"]
+    assert "Narnia" not in prompt
+
+
+def test_still_choosing_asks_nothing_about_fields(client, reply):
+    reply["answer"] = {"reply": "Is this a pilot?", "doc_type": None}
+
+    client.post("/api/chat", json={"messages": [{"role": "user", "content": "hmm"}]})
+
+    assert len(reply["calls"]) == 1
+
+
+def test_the_drafting_prompt_keeps_asking_until_complete(client, reply):
+    client.post(
+        "/api/chat", json={"doc_type": NDA, "messages": [{"role": "user", "content": "hi"}]}
+    )
+
+    assert "Every reply must end with a question" in reply["messages"][0]["content"]
+
+
+def test_the_drafting_prompt_records_values_it_did_not_ask_for(client, reply):
+    """Without this the model kept only answers to its own question, then asked again."""
+    client.post(
+        "/api/chat", json={"doc_type": NDA, "messages": [{"role": "user", "content": "hi"}]}
+    )
+
+    assert "whether or not you asked for it" in reply["messages"][0]["content"]
+
+
+def test_defaults_split_a_duration_into_value_and_unit():
+    values = document_chat.defaults(registry.get("CSA.md"))
+
+    assert values["subscriptionPeriod.value"] == "1"
+    assert values["subscriptionPeriod.unit"] == "years"
 
 
 class FakeResponse:
@@ -245,7 +319,7 @@ def test_the_preset_and_a_strict_schema_are_requested(monkeypatch):
     assert result == {"reply": "hi", "updates": []}
     assert sent["url"] == "https://openrouter.ai/api/v1/chat/completions"
     assert sent["headers"]["Authorization"] == "Bearer test-key"
-    assert sent["body"]["model"] == "@preset/prelegal"
+    assert sent["body"]["model"] == "@preset/pre-legal"
     assert sent["body"]["response_format"]["json_schema"]["strict"] is True
     assert sent["body"]["response_format"]["json_schema"]["name"] == "a_schema"
     get_settings.cache_clear()
@@ -278,3 +352,69 @@ def test_run_chat_parses_the_models_answer(monkeypatch):
     assert result.reply == "Noted."
     assert result.updates[0].field == "governingLaw"
     assert result.updates[0].value == "Delaware"
+
+
+def test_asking_for_another_agreement_only_warns_until_confirmed(client, reply):
+    reply["answer"] = {
+        "reply": "Switching discards everything so far. Start a CSA instead?",
+        "updates": [],
+        "switch_to": None,
+    }
+
+    response = client.post(
+        "/api/chat",
+        json={"doc_type": NDA, "messages": [{"role": "user", "content": "I want a CSA"}]},
+    )
+
+    assert response.json()["doc_type"] == NDA
+    assert len(reply["calls"]) == 1
+    assert "discards everything filled in so far" in reply["calls"][0]["messages"][0]["content"]
+
+
+def test_the_switch_enum_offers_every_other_agreement(client, reply):
+    client.post(
+        "/api/chat", json={"doc_type": NDA, "messages": [{"role": "user", "content": "hi"}]}
+    )
+
+    choices = reply["schema"]["properties"]["switch_to"]["enum"]
+    assert set(choices) == (set(registry.SPECS) - {NDA}) | {None}
+
+
+def test_a_confirmed_switch_starts_the_new_agreement_from_scratch(client, monkeypatch):
+    """Nothing from the old agreement reaches the new one: not the chat, not the form."""
+    answers = iter(
+        [
+            {"reply": "Switching.", "updates": [], "switch_to": "CSA.md"},
+            {"reply": "Who is the provider?", "updates": [], "switch_to": None},
+        ]
+    )
+    calls = []
+
+    def fake_complete(messages, schema_name, schema):
+        calls.append(messages)
+        return next(answers)
+
+    monkeypatch.setattr(document_chat, "complete", fake_complete)
+
+    response = client.post(
+        "/api/chat",
+        json={
+            "doc_type": NDA,
+            "messages": [
+                {"role": "user", "content": "Zyxwell and Globex"},
+                {"role": "assistant", "content": "Switching discards everything. Sure?"},
+                {"role": "user", "content": "yes"},
+            ],
+            "current": {"partyA.name": "Zyxwell"},
+        },
+    )
+
+    assert response.json() == {
+        "reply": "Who is the provider?",
+        "doc_type": "CSA.md",
+        "updates": [],
+    }
+    fresh = calls[1]
+    assert [m["role"] for m in fresh] == ["system", "user"]
+    assert "Cloud Service Agreement" in fresh[0]["content"]
+    assert "Zyxwell" not in "".join(m["content"] for m in fresh)
