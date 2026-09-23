@@ -1,6 +1,6 @@
 # Prelegal
 
-<img width="2493" height="1308" alt="FinAlly" src="https://github.com/user-attachments/assets/a566a3a7-50d1-402e-8765-977baac019dc" />
+<img width="2493" height="1314" alt="Prelegal" src="https://github.com/user-attachments/assets/055fa146-a213-4f49-b35e-1eb91fc628be" />
 
 Prelegal turns a conversation into a finished legal agreement.
 
