@@ -310,7 +310,7 @@ def test_the_preset_and_a_strict_schema_are_requested(monkeypatch):
     assert result == {"reply": "hi", "updates": []}
     assert sent["url"] == "https://openrouter.ai/api/v1/chat/completions"
     assert sent["headers"]["Authorization"] == "Bearer test-key"
-    assert sent["body"]["model"] == "@preset/prelegal"
+    assert sent["body"]["model"] == "@preset/pre-legal"
     assert sent["body"]["response_format"]["json_schema"]["strict"] is True
     assert sent["body"]["response_format"]["json_schema"]["name"] == "a_schema"
     get_settings.cache_clear()

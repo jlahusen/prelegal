@@ -14,7 +14,7 @@ from app.config import get_settings
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # The project routes every model choice through this preset.
-PRESET = "@preset/prelegal"
+PRESET = "@preset/pre-legal"
 
 TIMEOUT_SECONDS = 60
 

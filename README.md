@@ -63,7 +63,7 @@ All eleven are [Common Paper](https://commonpaper.com/) standards, used under CC
 | Backend | Python 3.13, FastAPI, Pydantic, [uv](https://docs.astral.sh/uv/) |
 | Frontend | Next.js 16 (static export), React 19, TypeScript, Tailwind CSS 4 |
 | Database | SQLite, recreated on every start |
-| AI | OpenRouter with structured outputs, via the `@preset/prelegal` preset |
+| AI | OpenRouter with structured outputs, via the `@preset/pre-legal` preset |
 | PDF | `html2pdf.js`, in the browser |
 | Packaging | One Docker image: the frontend is built to static files and served by FastAPI |
 
