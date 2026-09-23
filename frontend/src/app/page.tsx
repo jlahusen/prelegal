@@ -33,9 +33,11 @@ function initials(name: string): string {
 }
 
 export default function Home() {
-  const { spec, data, chosen, update, applyUpdates, save, status, switchTo, wouldLose } =
+  const { spec, data, chosen, dirty, update, applyUpdates, save, status, startOver } =
     useDraft();
   const [mobileView, setMobileView] = useState<"fill" | "preview">("fill");
+  /** Bumped when the reader picks a new template, so the chat starts over too. */
+  const [chatSession, setChatSession] = useState(0);
   const [fillMode, setFillMode] = useState<"chat" | "form">("chat");
   const documentRef = useRef<HTMLDivElement>(null);
 
@@ -100,8 +102,10 @@ export default function Home() {
           <div className="lg:sticky lg:top-8 space-y-4">
             <DocumentPicker
               docType={spec.doc_type}
-              wouldLose={wouldLose}
-              onPick={(next) => void switchTo(next)}
+              dirty={dirty}
+              onPick={(next) =>
+                void startOver(next).then(() => setChatSession((session) => session + 1))
+              }
             />
 
             <div className="flex gap-1 rounded-md border border-rule p-1">
@@ -122,11 +126,13 @@ export default function Home() {
             {/* Both stay mounted so the conversation survives a tab switch. */}
             <div className={fillMode === "chat" ? "block" : "hidden"}>
               <DocumentChat
+                key={chatSession}
                 spec={spec}
                 data={data}
                 chosen={chosen}
+                dirty={dirty}
                 onApply={applyUpdates}
-                onChooseDocument={(next) => void switchTo(next)}
+                onChooseDocument={(next, updates) => void startOver(next, updates)}
               />
             </div>
             <div className={fillMode === "form" ? "block" : "hidden"}>

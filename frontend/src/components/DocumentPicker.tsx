@@ -1,34 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { fetchCatalog, type CatalogEntry } from "@/lib/api";
 
 interface DocumentPickerProps {
   docType: string;
-  /** Named so the reader can decide before anything is discarded. */
-  wouldLose: (docType: string) => Promise<string[]>;
+  /** Anything has been entered, so switching must be confirmed first. */
+  dirty: boolean;
   onPick: (docType: string) => void;
 }
 
-export default function DocumentPicker({ docType, wouldLose, onPick }: DocumentPickerProps) {
+export default function DocumentPicker({ docType, dirty, onPick }: DocumentPickerProps) {
   const [catalog, setCatalog] = useState<CatalogEntry[]>([]);
-  const [pending, setPending] = useState<{ docType: string; losing: string[] } | null>(null);
+  const [pending, setPending] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCatalog().then(setCatalog).catch(() => setCatalog([]));
   }, []);
 
-  async function choose(next: string) {
+  function choose(next: string) {
     if (next === docType) return;
-    const losing = await wouldLose(next);
-    if (losing.length === 0) {
-      onPick(next);
-      return;
-    }
-    setPending({ docType: next, losing });
+    if (dirty) setPending(next);
+    else onPick(next);
   }
 
   const chosen = catalog.find((entry) => entry.filename === docType);
+  const target = catalog.find((entry) => entry.filename === pending);
 
   return (
     <div className="space-y-2">
@@ -41,7 +39,7 @@ export default function DocumentPicker({ docType, wouldLose, onPick }: DocumentP
       <select
         id="document-type"
         value={docType}
-        onChange={(e) => void choose(e.target.value)}
+        onChange={(e) => choose(e.target.value)}
         className="w-full rounded-md border border-rule bg-paper px-3 py-2 text-[0.925rem] text-ink transition-colors focus:border-seal focus:outline-none focus:ring-2 focus:ring-[rgba(178,58,46,0.4)]"
       >
         {catalog.map((entry) => (
@@ -52,37 +50,21 @@ export default function DocumentPicker({ docType, wouldLose, onPick }: DocumentP
       </select>
       {chosen && <p className="text-[0.75rem] text-slate">{chosen.description}</p>}
 
-      {pending && (
-        <div
-          role="alertdialog"
-          aria-label="Confirm document change"
-          className="space-y-3 rounded-md border border-seal bg-[rgba(216,212,200,0.3)] p-3"
-        >
-          <p className="text-[0.8rem] text-ink">
-            Switching keeps the parties and the shared terms. You would lose what you
-            entered for: <span className="font-medium">{pending.losing.join(", ")}</span>.
-          </p>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                onPick(pending.docType);
-                setPending(null);
-              }}
-              className="rounded-md bg-seal px-3 py-1.5 text-[0.8rem] font-medium text-paper transition-colors hover:bg-seal-dark"
-            >
-              Switch anyway
-            </button>
-            <button
-              type="button"
-              onClick={() => setPending(null)}
-              className="rounded-md border border-rule px-3 py-1.5 text-[0.8rem] text-slate transition-colors hover:text-ink"
-            >
-              Keep drafting
-            </button>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={pending !== null}
+        title={`Start a ${target?.name ?? "new agreement"}?`}
+        message={
+          "Switching templates starts over from a blank draft. Everything you have " +
+          "filled in so far, and the chat conversation, will be lost."
+        }
+        confirmLabel="Discard and switch"
+        cancelLabel="Keep drafting"
+        onConfirm={() => {
+          if (pending) onPick(pending);
+          setPending(null);
+        }}
+        onCancel={() => setPending(null)}
+      />
     </div>
   );
 }
