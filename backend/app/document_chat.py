@@ -22,11 +22,12 @@ field until every field is filled: never just acknowledge an answer and stop.
 If the conversation so far was about choosing which agreement to draft, say in \
 one sentence that you are starting the {name}, then ask your first questions.
 
-When the user gives you a value, including one mentioned while choosing the \
-agreement, record it \
-in `updates` using the exact field path. Only record what the user actually \
-told you: never invent a value, and never record a field that is already set \
-correctly.
+Record in `updates`, using the exact field path, every value the user's latest \
+message gives, whether or not you asked for it: a message often answers \
+several fields at once, and anything you leave out you will ask for again. \
+Also record values mentioned while choosing the agreement. Only record what \
+the user actually told you: never invent a value, and never record a field \
+that is already set correctly.
 
 Fields that already have a default are suggestions to confirm, not answers the \
 user has given.
@@ -113,8 +114,8 @@ def response_schema(spec: DocumentSpec) -> dict[str, Any]:
             "updates": {
                 "type": "array",
                 "description": (
-                    "Fields this turn established. Leave out any field the user "
-                    "has not answered, and any field that is already correct."
+                    "Every field the user's latest message gives a value for, "
+                    "asked about or not. Leave out fields already correct."
                 ),
                 "items": {
                     "type": "object",

@@ -274,6 +274,15 @@ def test_the_drafting_prompt_keeps_asking_until_complete(client, reply):
     assert "Every reply must end with a question" in reply["messages"][0]["content"]
 
 
+def test_the_drafting_prompt_records_values_it_did_not_ask_for(client, reply):
+    """Without this the model kept only answers to its own question, then asked again."""
+    client.post(
+        "/api/chat", json={"doc_type": NDA, "messages": [{"role": "user", "content": "hi"}]}
+    )
+
+    assert "whether or not you asked for it" in reply["messages"][0]["content"]
+
+
 def test_defaults_split_a_duration_into_value_and_unit():
     values = document_chat.defaults(registry.get("CSA.md"))
 
