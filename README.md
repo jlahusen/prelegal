@@ -1,5 +1,7 @@
 # Prelegal
 
+<img width="2493" height="1308" alt="FinAlly" src="https://github.com/user-attachments/assets/a566a3a7-50d1-402e-8765-977baac019dc" />
+
 Prelegal turns a conversation into a finished legal agreement.
 
 Pick one of eleven [Common Paper](https://commonpaper.com/) agreement types — or just describe
